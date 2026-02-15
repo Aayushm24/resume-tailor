@@ -28,6 +28,8 @@ You only need **one** of these:
 | GPT (OpenAI) | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | Pay-as-you-go |
 | Gemini (Google) | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) | Free |
 
+**Using a proxy (LiteLLM, Azure, etc.)?** Pick option 4 during setup and enter your proxy URL + token.
+
 ## What It Does
 
 1. **Extracts** your resume from a PDF upload

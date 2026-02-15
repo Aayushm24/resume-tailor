@@ -48,6 +48,11 @@ PROVIDER_CONFIG = {
         "default": "gemini-2.0-flash",
         "label": "Gemini (Google)",
     },
+    "proxy": {
+        "models": [],  # dynamic — user types model name
+        "default": "claude-sonnet-4",
+        "label": "LiteLLM / Proxy",
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -62,20 +67,27 @@ def get_ai_client() -> tuple:
     """Return (provider_type, client) tuple. provider_type is 'anthropic' or 'openai'."""
     provider = _get_provider()
 
-    if provider == "anthropic":
-        # Check for LiteLLM-style proxy first
-        base_url = os.environ.get("ANTHROPIC_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
-        if base_url:
-            api_key = (
-                os.environ.get("ANTHROPIC_API_KEY")
-                or os.environ.get("ANTHROPIC_AUTH_TOKEN")
-                or os.environ.get("OPENAI_API_KEY")
-            )
-            if not base_url.endswith("/v1"):
-                base_url = base_url.rstrip("/") + "/v1"
-            return ("openai", OpenAI(api_key=api_key, base_url=base_url))
+    if provider == "proxy":
+        # LiteLLM or any OpenAI-compatible proxy
+        api_key = (
+            os.environ.get("PROXY_API_KEY")
+            or os.environ.get("OPENAI_API_KEY")
+            or os.environ.get("ANTHROPIC_API_KEY")
+            or os.environ.get("ANTHROPIC_AUTH_TOKEN")
+        )
+        base_url = (
+            os.environ.get("PROXY_BASE_URL")
+            or os.environ.get("OPENAI_BASE_URL")
+            or os.environ.get("ANTHROPIC_BASE_URL")
+        )
+        if not base_url:
+            st.error("Set PROXY_BASE_URL in your .env file (e.g. https://your-litellm-proxy.com).")
+            st.stop()
+        if not base_url.endswith("/v1"):
+            base_url = base_url.rstrip("/") + "/v1"
+        return ("openai", OpenAI(api_key=api_key, base_url=base_url))
 
-        # Native Anthropic SDK
+    elif provider == "anthropic":
         api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")
         if not api_key:
             st.error("Set ANTHROPIC_API_KEY in your .env file. Run `./setup.sh` to configure.")
@@ -623,11 +635,18 @@ def main():
     # Model selector based on configured provider
     provider = _get_provider()
     pconfig = PROVIDER_CONFIG.get(provider, PROVIDER_CONFIG["anthropic"])
-    selected_model = st.selectbox(
-        f"AI Model ({pconfig['label']})",
-        pconfig["models"],
-        index=0,
-    )
+    if provider == "proxy":
+        selected_model = st.text_input(
+            "Model name (type your proxy's model ID)",
+            value=pconfig["default"],
+            help="Enter the exact model name your LiteLLM / proxy supports.",
+        )
+    else:
+        selected_model = st.selectbox(
+            f"AI Model ({pconfig['label']})",
+            pconfig["models"],
+            index=0,
+        )
     st.divider()
 
     # ---- Input section ----

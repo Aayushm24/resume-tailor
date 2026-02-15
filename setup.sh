@@ -25,6 +25,7 @@ if [ ! -f .env ]; then
     echo "  1) Claude (Anthropic)  — recommended"
     echo "  2) GPT (OpenAI)"
     echo "  3) Gemini (Google)     — free tier available"
+    echo "  4) LiteLLM / Proxy    — custom OpenAI-compatible proxy"
     echo ""
     read -rp "Enter choice [1]: " choice
     choice=${choice:-1}
@@ -35,40 +36,69 @@ if [ ! -f .env ]; then
             key_name="ANTHROPIC_API_KEY"
             echo ""
             echo "Get your key at: https://console.anthropic.com/"
+            read -rp "Paste your API key: " api_key
+            if [ -z "$api_key" ]; then echo "Error: API key cannot be empty."; exit 1; fi
+            cat > .env <<EOF
+AI_PROVIDER=$provider
+$key_name=$api_key
+EOF
             ;;
         2)
             provider="openai"
             key_name="OPENAI_API_KEY"
             echo ""
             echo "Get your key at: https://platform.openai.com/api-keys"
+            read -rp "Paste your API key: " api_key
+            if [ -z "$api_key" ]; then echo "Error: API key cannot be empty."; exit 1; fi
+            cat > .env <<EOF
+AI_PROVIDER=$provider
+$key_name=$api_key
+EOF
             ;;
         3)
             provider="google"
             key_name="GOOGLE_API_KEY"
             echo ""
             echo "Get your key at: https://aistudio.google.com/apikey"
+            read -rp "Paste your API key: " api_key
+            if [ -z "$api_key" ]; then echo "Error: API key cannot be empty."; exit 1; fi
+            cat > .env <<EOF
+AI_PROVIDER=$provider
+$key_name=$api_key
+EOF
+            ;;
+        4)
+            echo ""
+            echo "LiteLLM / Proxy setup"
+            echo "This uses any OpenAI-compatible API endpoint."
+            echo ""
+            read -rp "Proxy base URL (e.g. https://your-litellm.com): " proxy_url
+            if [ -z "$proxy_url" ]; then echo "Error: URL cannot be empty."; exit 1; fi
+            read -rp "API key / auth token: " api_key
+            if [ -z "$api_key" ]; then echo "Error: API key cannot be empty."; exit 1; fi
+            cat > .env <<EOF
+AI_PROVIDER=proxy
+PROXY_BASE_URL=$proxy_url
+PROXY_API_KEY=$api_key
+EOF
             ;;
         *)
             echo "Invalid choice. Defaulting to Claude."
             provider="anthropic"
             key_name="ANTHROPIC_API_KEY"
-            ;;
-    esac
-
-    read -rp "Paste your API key: " api_key
-
-    if [ -z "$api_key" ]; then
-        echo "Error: API key cannot be empty."
-        exit 1
-    fi
-
-    cat > .env <<EOF
+            echo ""
+            echo "Get your key at: https://console.anthropic.com/"
+            read -rp "Paste your API key: " api_key
+            if [ -z "$api_key" ]; then echo "Error: API key cannot be empty."; exit 1; fi
+            cat > .env <<EOF
 AI_PROVIDER=$provider
 $key_name=$api_key
 EOF
+            ;;
+    esac
 
     echo ""
-    echo "Saved .env (provider=$provider)"
+    echo "Saved .env"
 fi
 
 # ---- Python venv ----
