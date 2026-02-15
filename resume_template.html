@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page {
+        size: A4;
+        margin: 0.55in 0.65in;
+    }
+    body {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 10.5pt;
+        line-height: 1.35;
+        color: #000000;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 20px 30px;
+    }
+
+    /* ---- Header ---- */
+    .header {
+        text-align: center;
+        margin-bottom: 6pt;
+    }
+    .header h1 {
+        font-size: 22pt;
+        margin: 0 0 4pt 0;
+        font-weight: bold;
+        color: #000000;
+    }
+    .contact-info {
+        font-size: 9.5pt;
+        color: #000000;
+        margin: 0;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+        margin-bottom: 6pt;
+    }
+    .section-title {
+        font-size: 11pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5pt;
+        color: #000000;
+        margin-bottom: 0;
+        padding-bottom: 3pt;
+        border-bottom: 2.5px solid #000000;
+    }
+    .section-body {
+        margin-top: 6pt;
+    }
+
+    /* ---- Text blocks ---- */
+    .profile-text {
+        font-size: 10.5pt;
+        color: #000000;
+        margin: 0;
+    }
+
+    /* ---- Experience / two-col items ---- */
+    .exp-item {
+        margin-bottom: 8pt;
+    }
+    .exp-row {
+        display: table;
+        width: 100%;
+        margin: 0;
+    }
+    .exp-left {
+        display: table-cell;
+        text-align: left;
+        width: 60%;
+    }
+    .exp-right {
+        display: table-cell;
+        text-align: right;
+        width: 40%;
+    }
+    .item-primary {
+        font-weight: bold;
+        font-size: 10.5pt;
+        color: #000000;
+    }
+    .item-secondary {
+        font-size: 10.5pt;
+        color: #000000;
+    }
+    .item-sub-left {
+        font-style: italic;
+        font-size: 10.5pt;
+        color: #000000;
+    }
+    .item-sub-right {
+        font-style: italic;
+        font-size: 10.5pt;
+        color: #000000;
+    }
+    .subsection-title {
+        font-weight: bold;
+        font-size: 10pt;
+        color: #000000;
+        margin: 4pt 0 2pt 0;
+    }
+    ul.bullets {
+        margin: 2pt 0 2pt 0;
+        padding-left: 18pt;
+        list-style-type: disc;
+    }
+    ul.bullets li {
+        font-size: 10pt;
+        color: #000000;
+        margin-bottom: 2pt;
+        line-height: 1.3;
+    }
+
+    /* ---- Skills / plain text sections ---- */
+    .skills-text {
+        font-size: 10pt;
+        color: #000000;
+        margin: 2pt 0;
+        line-height: 1.4;
+    }
+
+    /* ---- Change highlights ---- */
+    .changed {
+        text-decoration: underline;
+        text-decoration-color: #16a34a;
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 2px;
+    }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <h1>{{ name }}</h1>
+    <p class="contact-info">{{ contact_line }}</p>
+</div>
+
+<!-- Dynamic Sections -->
+{% for section in sections %}
+<div class="section">
+    <div class="section-title">{{ section.title }}</div>
+    <div class="section-body">
+
+        {% if section.type == "text" %}
+            <p class="profile-text">{{ section.content }}</p>
+
+        {% elif section.type == "experience" %}
+            {% for item in section.entries %}
+            <div class="exp-item">
+                {% if item.left_primary or item.right_primary %}
+                <div class="exp-row">
+                    <div class="exp-left"><span class="item-primary">{{ item.left_primary }}</span></div>
+                    <div class="exp-right"><span class="item-secondary">{{ item.right_primary }}</span></div>
+                </div>
+                {% endif %}
+                {% if item.left_secondary or item.right_secondary %}
+                <div class="exp-row">
+                    <div class="exp-left"><span class="item-sub-left">{{ item.left_secondary }}</span></div>
+                    <div class="exp-right"><span class="item-sub-right">{{ item.right_secondary }}</span></div>
+                </div>
+                {% endif %}
+
+                {% if item.subsections %}
+                    {% for sub in item.subsections %}
+                    <div class="subsection-title">{{ sub.title }}</div>
+                    <ul class="bullets">
+                        {% for bullet in sub.bullets %}
+                        <li>{{ bullet }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endfor %}
+                {% endif %}
+
+                {% if item.bullets %}
+                <ul class="bullets">
+                    {% for bullet in item.bullets %}
+                    <li>{{ bullet }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% if item.description %}
+                <p class="profile-text">{{ item.description }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+        {% elif section.type == "list" %}
+            {% for line in section.lines %}
+            <p class="skills-text">{{ line }}</p>
+            {% endfor %}
+
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+</body>
+</html>
