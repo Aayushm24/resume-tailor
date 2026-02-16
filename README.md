@@ -33,12 +33,23 @@ OPENAI_API_KEY=sk-...          # Get from https://platform.openai.com/api-keys
 GOOGLE_API_KEY=AI...           # Get from https://aistudio.google.com/apikey
 ```
 
-Run any demo:
+Run all 3 demos at once:
 
 ```bash
-streamlit run app.py                # Demo 1: Resume Tailor
-streamlit run website_generator.py  # Demo 2: Landing Page Builder
-streamlit run competitor_intel.py   # Demo 3: Competitor Intel
+./run_all.sh
+```
+
+This launches all three on separate ports:
+- **localhost:8501** — Resume Tailor
+- **localhost:8502** — Landing Page Builder
+- **localhost:8503** — Competitor Intel
+
+Or run individually:
+
+```bash
+streamlit run app.py --server.port 8501
+streamlit run website_generator.py --server.port 8502
+streamlit run competitor_intel.py --server.port 8503
 ```
 
 ## Get an API Key
